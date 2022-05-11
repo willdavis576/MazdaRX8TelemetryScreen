@@ -1,0 +1,18 @@
+******** OBD ADAPTER PINS ********
+
+1	black
+2	brown
+3	red
+4	orange
+5	yellow				Systen Ground
+6	dark green 			CAN H
+7	blue
+8	purple
+9	grey
+10	white
+11	pink
+12	light green
+13	black w/ white stripe
+14	brown w/ white stripe 		CAN L
+15	red w/ white stripe
+16	dark green /w white stripe
