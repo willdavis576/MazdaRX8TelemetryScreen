@@ -6,12 +6,10 @@ pedal = 0
 engineTemp = 0
 
 while True:
-    try:
-        # data = str(ser.readline())
-        
+    try:        
         data = ser.readline()[2:].decode("utf-8").strip()
 
-        if '201' in data[:2]:
+        if '201' in data[:5]:
             datasplit = data.split(",")
             pedal = int(eval(datasplit[8]))/2
             # print(pedal)
