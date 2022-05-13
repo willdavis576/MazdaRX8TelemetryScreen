@@ -223,6 +223,13 @@ float coolantTemp;
 float engineTemp;
 float oilPressure;
 
+//0x4b0 - unsure the difference between 0x4b0 and 0x4b1
+float rearRightW;
+float rearLeftW;
+float diffWheelSpeed;
+float gearRatio;
+float wheelCirc; //i'm guessing for now
+
 void messageDecode(long unsigned int rxId, unsigned char len, unsigned char rxBuf[8]) {
   switch (rxId) {
     case 0x201:
@@ -249,6 +256,21 @@ void messageDecode(long unsigned int rxId, unsigned char len, unsigned char rxBu
 //      Serial.print("Oil Pressure:\t");
 //      Serial.println(oilPressure);
       break;
+
+    case 0x4b1:
+      rearLeftW = ((rxBuf[4] + rxBuf[5]) - 10000) / 100; //this needs to be tested lol in kph
+      rearRightW = ((rxBuf[6] + rxBuf[7]) - 10000) / 100; //same lol
+
+      diffWheelSpeed = (rearRightW + rearLeftW) / 2; //Average wheel speed for rear wheels -> approx.
+
+      wheelCirc = 26.1; //inch probs, i'm guessing lol
+
+      //1000rpm at 10mph = 16kmh  = 4.44444m/s -> guess
+      //wheel rpm = 2.3578494
+
+
+
+
   }
 
   
@@ -267,18 +289,5 @@ void loop()
 
 //    Serial.print(msgString);
     messageDecode(rxId, len, rxBuf);
-    
-
-    //    if ((rxId & 0x40000000) == 0x40000000) {  // Determine if message is a remote request frame.
-    //      sprintf(msgString, " REMOTE REQUEST FRAME");
-    //      Serial.print(msgString);
-    //
-    //    } else {
-//    for (byte i = 0; i < len; i++) { //len
-//      sprintf(msgString, ",0x%.2X", rxBuf[i]);
-//      Serial.print(msgString);
-//    }
-    //    }
-//    Serial.println();
   }
 }
