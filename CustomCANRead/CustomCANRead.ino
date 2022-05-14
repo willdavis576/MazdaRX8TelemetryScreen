@@ -226,9 +226,11 @@ float oilPressure;
 //0x4b0 - unsure the difference between 0x4b0 and 0x4b1
 float rearRightW;
 float rearLeftW;
-float diffWheelSpeed;
+float aveWheelSpeed;
 float gearRatio;
 float wheelCirc; //i'm guessing for now
+float wheelRPM;
+float gearRatio; //inc final drive, idk how to deduce between them without looking
 
 void messageDecode(long unsigned int rxId, unsigned char len, unsigned char rxBuf[8]) {
   switch (rxId) {
@@ -261,12 +263,15 @@ void messageDecode(long unsigned int rxId, unsigned char len, unsigned char rxBu
       rearLeftW = ((rxBuf[4] + rxBuf[5]) - 10000) / 100; //this needs to be tested lol in kph
       rearRightW = ((rxBuf[6] + rxBuf[7]) - 10000) / 100; //same lol
 
-      diffWheelSpeed = (rearRightW + rearLeftW) / 2; //Average wheel speed for rear wheels -> approx.
+      aveWheelSpeed = (rearRightW + rearLeftW) / 2; //Average wheel speed for rear wheels -> approx.
 
-      wheelCirc = 26.1; //inch probs, i'm guessing lol
+      wheelCirc = 0.66294; //m, i'm guessing lol 26.1 inch
 
-      //1000rpm at 10mph = 16kmh  = 4.44444m/s -> guess
-      //wheel rpm = 2.3578494
+      wheelRPM = aveWheelSpeed / wheelCirc;
+
+      if (engineRPM > 0) {
+        gearRatio = engineRPM / wheelRPM;
+      }
 
 
 
