@@ -227,10 +227,9 @@ float oilPressure;
 float rearRightW;
 float rearLeftW;
 float aveWheelSpeed;
-float gearRatio;
+float gearRatio; //inc final drive, idk how to deduce between them without looking
 float wheelCirc; //i'm guessing for now
 float wheelRPM;
-float gearRatio; //inc final drive, idk how to deduce between them without looking
 
 void messageDecode(long unsigned int rxId, unsigned char len, unsigned char rxBuf[8]) {
   switch (rxId) {
@@ -244,6 +243,19 @@ void messageDecode(long unsigned int rxId, unsigned char len, unsigned char rxBu
 //      Serial.print("\t");
 //      Serial.println(pedalPosition);
       break;
+
+    case 0x203: //Traction Control light or torque or something 
+      //NEED TO TESTS THIS
+      Seiral.print("First Traction Control Row:\t");
+      Serial.println(rxBuf);
+      break;
+
+    case 0x231: //Also to do with traction control apparently
+      //Also need to test his
+      Serial.print("Second Traction Control Row:\t");
+      Serial.println(rxBuf);
+      break;
+
 
     case 0x240:
       coolantTemp = rxBuf[3] - 40;
@@ -259,13 +271,20 @@ void messageDecode(long unsigned int rxId, unsigned char len, unsigned char rxBu
 //      Serial.println(oilPressure);
       break;
 
+    
+    case 0x430: //Need to test this -> Apparently fuel level??????
+      Serial.print("Fuel Level:\t");
+      Serial.println(rxBuf);
+      break;
+      
+
     case 0x4b1:
       rearLeftW = ((rxBuf[4] + rxBuf[5]) - 10000) / 100; //this needs to be tested lol in kph
       rearRightW = ((rxBuf[6] + rxBuf[7]) - 10000) / 100; //same lol
 
       aveWheelSpeed = (rearRightW + rearLeftW) / 2; //Average wheel speed for rear wheels -> approx.
 
-      wheelCirc = 0.66294; //m, i'm guessing lol 26.1 inch
+      wheelCirc = 0.66294; //m, i'm guessing lol 26.1 inch  
 
       wheelRPM = aveWheelSpeed / wheelCirc;
 
