@@ -231,52 +231,63 @@ float gearRatio; //inc final drive, idk how to deduce between them without looki
 float wheelCirc; //i'm guessing for now
 float wheelRPM;
 
+void printEverything(long unsigned int rxId, unsigned char len, unsigned char rxBuf[8]) {
+  Serial.print(rxBuf[0]);
+  Serial.print(rxBuf[1]);
+  Serial.print(rxBuf[2]);
+  Serial.print(rxBuf[3]);
+  Serial.print(rxBuf[4]);
+  Serial.print(rxBuf[5]);
+  Serial.print(rxBuf[6]);
+  Serial.print(rxBuf[7]);
+}
+
 void messageDecode(long unsigned int rxId, unsigned char len, unsigned char rxBuf[8]) {
   switch (rxId) {
     case 0x201:
       engineRPM = ((rxBuf[0] * 256.0) + (rxBuf[1] / 4.0)) / 3.85;
       carSpeed = (rxBuf[4] * 256 + rxBuf[5] - 10000) / 100;
       pedalPosition = (rxBuf[6]) / 2;
-//      Serial.print(engineRPM);        
-//      Serial.print("\t");
-//      Serial.print(carSpeed);
-//      Serial.print("\t");
-//      Serial.println(pedalPosition);
+      //      Serial.print(engineRPM);
+      //      Serial.print("\t");
+      //      Serial.print(carSpeed);
+      //      Serial.print("\t");
+      //      Serial.println(pedalPosition);
       break;
 
-    case 0x203: //Traction Control light or torque or something 
+    case 0x203: //Traction Control light or torque or something
       //NEED TO TESTS THIS
-      Seiral.print("First Traction Control Row:\t");
-      Serial.println(rxBuf);
+//      Serial.print("First Traction Control Row:\t");
+      printEverything(rxId, len, rxBuf);
       break;
 
     case 0x231: //Also to do with traction control apparently
       //Also need to test his
-      Serial.print("Second Traction Control Row:\t");
-      Serial.println(rxBuf);
+//      Serial.print("Second Traction Control Row:\t");
+//      printEverything(rxId, len, rxBuf);
       break;
 
 
     case 0x240:
       coolantTemp = rxBuf[3] - 40;
-//      Serial.print("Coolant Temp:\t");
-//      Serial.println(coolantTemp);
+      //      Serial.print("Coolant Temp:\t");
+      //      Serial.println(coolantTemp);
       break;
 
     case 0x420:
-    //20 - 120c -> 90 - 170
+      //20 - 120c -> 90 - 170
       engineTemp = map(rxBuf[0], 90, 170, 20, 120);
       oilPressure = rxBuf[4]; //useless LOL
-//      Serial.print("Oil Pressure:\t");
-//      Serial.println(oilPressure);
+      //      Serial.print("Oil Pressure:\t");
+      //      Serial.println(oilPressure);
       break;
 
-    
+
     case 0x430: //Need to test this -> Apparently fuel level??????
-      Serial.print("Fuel Level:\t");
-      Serial.println(rxBuf);
+//      Serial.print("Fuel Level:\t");
+      printEverything(rxId, len, rxBuf);
       break;
-      
+
 
     case 0x4b1:
       rearLeftW = ((rxBuf[4] + rxBuf[5]) - 10000) / 100; //this needs to be tested lol in kph
@@ -284,20 +295,20 @@ void messageDecode(long unsigned int rxId, unsigned char len, unsigned char rxBu
 
       aveWheelSpeed = (rearRightW + rearLeftW) / 2; //Average wheel speed for rear wheels -> approx.
 
-      wheelCirc = 0.66294; //m, i'm guessing lol 26.1 inch  
+      wheelCirc = 0.66294; //m, i'm guessing lol 26.1 inch
 
       wheelRPM = aveWheelSpeed / wheelCirc;
 
       if (engineRPM > 0) {
         gearRatio = engineRPM / wheelRPM;
       }
-
+      break;
 
 
 
   }
 
-  
+
 }
 
 void loop()
@@ -311,7 +322,7 @@ void loop()
     else
       sprintf(msgString, "0x%.3lX,%1d", rxId, len); //Standard.
 
-//    Serial.print(msgString);
+    //    Serial.print(msgString);
     messageDecode(rxId, len, rxBuf);
   }
 }
