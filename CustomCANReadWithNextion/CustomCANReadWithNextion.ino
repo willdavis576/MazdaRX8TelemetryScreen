@@ -183,6 +183,15 @@
   Intake Air Temp(degree celsius): ID 0x250, data[3] - 40
 */
 
+//Nextion Shiz
+#include "EasyNextionLibrary.h"
+EasyNex myNex(Serial);
+
+const int REFRESH_TIME = 100;           // time to refresh the Nextion page every 100 ms
+unsigned long refresh_timer = millis();  // timer for refreshing Nextion's page
+
+
+//Main CAN bus stuffs
 #include <mcp_can.h>
 #include <SPI.h>
 
@@ -231,16 +240,6 @@ float gearRatio; //inc final drive, idk how to deduce between them without looki
 float wheelCirc; //i'm guessing for now
 float wheelRPM;
 
-void printEverything(long unsigned int rxId, unsigned char len, unsigned char rxBuf[8]) {
-  Serial.print(rxBuf[0]);
-  Serial.print(rxBuf[1]);
-  Serial.print(rxBuf[2]);
-  Serial.print(rxBuf[3]);
-  Serial.print(rxBuf[4]);
-  Serial.print(rxBuf[5]);
-  Serial.print(rxBuf[6]);
-  Serial.print(rxBuf[7]);
-}
 
 void messageDecode(long unsigned int rxId, unsigned char len, unsigned char rxBuf[8]) {
   switch (rxId) {
@@ -258,34 +257,25 @@ void messageDecode(long unsigned int rxId, unsigned char len, unsigned char rxBu
     case 0x203: //Traction Control light or torque or something
       //NEED TO TESTS THIS
 //      Serial.print("First Traction Control Row:\t");
-//      printEverything(rxId, len, rxBuf);
+//      
       break;
 
-    case 0x231: //Also to do with traction control apparently
-      //Also need to test his
-//      Serial.print("Second Traction Control Row:\t");
-//      printEverything(rxId, len, rxBuf);
+    case 0x231: //Done, in data sheet
+  
       break;
 
 
     case 0x240:
       coolantTemp = rxBuf[3] - 40;
-      //      Serial.print("Coolant Temp:\t");
-      //      Serial.println(coolantTemp);
       break;
 
     case 0x420:
-      //20 - 120c -> 90 - 170
       engineTemp = map(rxBuf[0], 90, 170, 20, 120);
       oilPressure = rxBuf[4]; //useless LOL
-      //      Serial.print("Oil Pressure:\t");
-      //      Serial.println(oilPressure);
       break;
 
 
-    case 0x430: //Need to test this -> Apparently fuel level??????
-//      Serial.print("Fuel Level:\t");
-//      printEverything(rxId, len, rxBuf);
+    case 0x430: //done in datasheet    
       break;
 
 
@@ -313,14 +303,21 @@ void messageDecode(long unsigned int rxId, unsigned char len, unsigned char rxBu
 
 void loop()
 {
+
+  if((millis()-refresh_timer) > REFRESH_TIME){ 
+      myNex.writeNum("acl.val", pedalPosition);   
+      refresh_timer = millis();
+    }       
+ 
+  
   if (!digitalRead(CAN0_INT))
   {
     CAN0.readMsgBuf(&rxId, &len, rxBuf);
-
-    if ((rxId & 0x80000000) == 0x80000000)    // Determine if ID is standard (11 bits) or extended (29 bits)
-      sprintf(msgString, "Extended ID: 0x%.8lX  DLC: %1d  Data:", (rxId & 0x1FFFFFFF), len);
-    else
-      sprintf(msgString, "0x%.3lX,%1d", rxId, len); //Standard.
+//
+//    if ((rxId & 0x80000000) == 0x80000000)    // Determine if ID is standard (11 bits) or extended (29 bits)
+//      sprintf(msgString, "Extended ID: 0x%.8lX  DLC: %1d  Data:", (rxId & 0x1FFFFFFF), len);
+//    else
+//      sprintf(msgString, "0x%.3lX,%1d", rxId, len); //Standard.
 
     //    Serial.print(msgString);
     messageDecode(rxId, len, rxBuf);

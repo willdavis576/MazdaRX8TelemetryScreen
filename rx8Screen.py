@@ -37,15 +37,15 @@ class Runnable(QRunnable):
     def run(self):
         while True:
             #refresh Zone
-            sleep(0.005)
-            self.loopRate += 100
+            # sleep(0.01)
+            self.loopRate += 1
             # if self.currentFrame % 60 == 0
             self.RPMGuageDisplay()
             
             if self.upDown == True:
-                self.RPMDec += 10
+                self.RPMDec += 1
             if self.upDown == False:
-                self.RPMDec -= 10
+                self.RPMDec -= 1
                 
             if self.RPMDec > 10000 and self.upDown == True:
                 self.upDown = False
@@ -100,7 +100,7 @@ class Ui_MainWindow(object):
         self.centralwidget.setObjectName("centralwidget")
         self.graphicsView = QtWidgets.QGraphicsView(self.centralwidget)
         self.graphicsView.setGeometry(QtCore.QRect(0, 0, 723, 475))
-        self.graphicsView.setStyleSheet("background-image: url(C:/Users/Will/OneDrive - Middlesex University/Inventions/IsaacRX8/MazdaRX8TelemetryScreen/carbonTexture.png); background-repeat: no-repeat; background-position: center;\\)\n"
+        self.graphicsView.setStyleSheet("background-image: url(C:/Users/Will/OneDrive - Middlesex University/Inventions/IsaacRX8/carbonTexture.png); background-repeat: no-repeat; background-position: center;\\)\n"
 "")
         self.graphicsView.setObjectName("graphicsView")
         self.speedDec = QtWidgets.QLabel(self.centralwidget)
