@@ -216,6 +216,9 @@ float engineRPM;
 float carSpeed;
 float pedalPosition;
 
+//0x231
+float susBin;
+
 //0x240
 float coolantTemp;
 
@@ -233,13 +236,21 @@ float wheelRPM;
 
 void printEverything(long unsigned int rxId, unsigned char len, unsigned char rxBuf[8]) {
   Serial.print(rxBuf[0]);
+   Serial.print("\t");
   Serial.print(rxBuf[1]);
+   Serial.print("\t");
   Serial.print(rxBuf[2]);
+   Serial.print("\t");
   Serial.print(rxBuf[3]);
+   Serial.print("\t");
   Serial.print(rxBuf[4]);
+   Serial.print("\t");
   Serial.print(rxBuf[5]);
+   Serial.print("\t");
   Serial.print(rxBuf[6]);
+   Serial.print("\t");
   Serial.print(rxBuf[7]);
+  Serial.println();
 }
 
 void messageDecode(long unsigned int rxId, unsigned char len, unsigned char rxBuf[8]) {
@@ -248,21 +259,28 @@ void messageDecode(long unsigned int rxId, unsigned char len, unsigned char rxBu
       engineRPM = ((rxBuf[0] * 256.0) + (rxBuf[1] / 4.0)) / 3.85;
       carSpeed = (rxBuf[4] * 256 + rxBuf[5] - 10000) / 100;
       pedalPosition = (rxBuf[6]) / 2;
-      //      Serial.print(engineRPM);
-      //      Serial.print("\t");
-      //      Serial.print(carSpeed);
-      //      Serial.print("\t");
-      //      Serial.println(pedalPosition);
+//      Serial.print("EngineRPM:\t");
+//            Serial.println(engineRPM);
+//            Serial.print("\t");
+////            Serial.print(carSpeed);
+//            Serial.print("Pedal Position:\t");
+//            Serial.print(pedalPosition);
+//            Serial.print("\n");
       break;
 
     case 0x203: //Traction Control light or torque or something
       //NEED TO TESTS THIS
+//      Serial.print("ingector:\t");
+//      Serial.println(rxBuf[5]);
 //      Serial.print("First Traction Control Row:\t");
-      printEverything(rxId, len, rxBuf);
+//      printEverything(rxId, len, rxBuf);
       break;
 
     case 0x231: //Also to do with traction control apparently
       //Also need to test his
+//        Serial.print("SusBIN:\t"); //rxbuf[0] 255 in gear, 15 out of gear
+//        Serial.print(rxBuf[0]);
+//        Serial.println();
 //      Serial.print("Second Traction Control Row:\t");
 //      printEverything(rxId, len, rxBuf);
       break;
@@ -270,7 +288,7 @@ void messageDecode(long unsigned int rxId, unsigned char len, unsigned char rxBu
 
     case 0x240:
       coolantTemp = rxBuf[3] - 40;
-      //      Serial.print("Coolant Temp:\t");
+//            Serial.print("Coolant Temp:\t");
       //      Serial.println(coolantTemp);
       break;
 
@@ -278,13 +296,14 @@ void messageDecode(long unsigned int rxId, unsigned char len, unsigned char rxBu
       //20 - 120c -> 90 - 170
       engineTemp = map(rxBuf[0], 90, 170, 20, 120);
       oilPressure = rxBuf[4]; //useless LOL
-      //      Serial.print("Oil Pressure:\t");
+//            Serial.print("Oil Pressure:\t");
       //      Serial.println(oilPressure);
       break;
 
 
     case 0x430: //Need to test this -> Apparently fuel level??????
 //      Serial.print("Fuel Level:\t");
+      
       printEverything(rxId, len, rxBuf);
       break;
 
