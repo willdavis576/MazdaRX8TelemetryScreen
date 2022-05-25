@@ -356,6 +356,23 @@ void sendData() {
     }
 }
 
+unsigned long oldTime;
+unsigned long interval;
+bool repeat = false;
+
+void captureCANIDFreq(long unsigned int target) { //try find the average time from a set amount of loops
+    if (rxId == target && repeat == false) {
+      interval = oldTime - milis();
+      oldTime = millis();
+      repeat = true;
+      Serial.println(interval);
+    }
+
+    if (rxId != target && repeat == true) {
+      repeat = false;
+    }
+}
+
 void loop()
 {
   //Receive
@@ -372,6 +389,7 @@ void loop()
     messageDecode(rxId, len, rxBuf);
   }
 
+  captureCANIDFreq(0x201); //trying to capture throttle pedal frequency
 //  sendData();
 
 }
