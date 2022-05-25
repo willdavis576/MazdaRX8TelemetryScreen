@@ -360,7 +360,7 @@ unsigned long oldTime;
 unsigned long interval;
 bool repeat = false;
 
-void captureCANIDFreq(long unsigned int target) { //try find the average time from a set amount of loops
+void captureCANIDFreq(long unsigned int target, unsigned char len) { //try find the average time from a set amount of loops
     if (rxId == target && repeat == false) {
       interval = oldTime - milis();
       oldTime = millis();
@@ -389,7 +389,7 @@ void loop()
     messageDecode(rxId, len, rxBuf);
   }
 
-  captureCANIDFreq(0x201); //trying to capture throttle pedal frequency
+  captureCANIDFreq(0x201, 8); //trying to capture throttle pedal packet frequency
 //  sendData();
 
 }
