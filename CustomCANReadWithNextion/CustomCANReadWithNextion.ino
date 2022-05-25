@@ -183,14 +183,14 @@
   Intake Air Temp(degree celsius): ID 0x250, data[3] - 40
 */
 //Nextion Shiz
-#include "EasyNextionLibrary.h"
-EasyNex myNex(Serial);
+//#include "EasyNextionLibrary.h"
+//EasyNex myNex(Serial);
 
-const int REFRESH_TIME = 100;           // time to refresh the Nextion page every 100 ms
+const int REFRESH_TIME = 80;           // time to refresh the Nextion page every 100 ms
 unsigned long refresh_timer = millis();  // timer for refreshing Nextion's page
 
 
-//Main CAN bus 
+//Main CAN bus
 #include <mcp_can.h>
 #include <SPI.h>
 
@@ -205,24 +205,25 @@ MCP_CAN CAN0(10);                               // Set CS to pin 10
 
 void setup()
 {
-  Serial.begin(115200);
-
-  if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK)
-    Serial.println("MCP2515 Initialized Successfully!");
-  else
-    Serial.println("Error Initializing MCP2515...");
+  //  myNex.begin(9600);
+  Serial.begin(9600);
+  CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ);
+  //  if (CAN0.begin(MCP_ANY, CAN_500KBPS, MCP_8MHZ) == CAN_OK)
+  //    Serial.println("MCP2515 Initialized Successfully!");
+  //  else
+  //    Serial.println("Error Initializing MCP2515...");
 
   CAN0.setMode(MCP_NORMAL);                     // Set operation mode to normal so the MCP2515 sends acks to received data.
 
   pinMode(CAN0_INT, INPUT);                            // Configuring pin for /INT input
 
-  Serial.println("Ready...");
+  //  Serial.println("Ready...");
 }
 
 //0x201
 float engineRPM;
 float carSpeed;
-float pedalPosition;
+uint16_t pedalPosition;
 
 //0x231
 float susBin;
@@ -244,19 +245,19 @@ float wheelRPM;
 
 void printEverything(long unsigned int rxId, unsigned char len, unsigned char rxBuf[8]) {
   Serial.print(rxBuf[0]);
-   Serial.print("\t");
+  Serial.print("\t");
   Serial.print(rxBuf[1]);
-   Serial.print("\t");
+  Serial.print("\t");
   Serial.print(rxBuf[2]);
-   Serial.print("\t");
+  Serial.print("\t");
   Serial.print(rxBuf[3]);
-   Serial.print("\t");
+  Serial.print("\t");
   Serial.print(rxBuf[4]);
-   Serial.print("\t");
+  Serial.print("\t");
   Serial.print(rxBuf[5]);
-   Serial.print("\t");
+  Serial.print("\t");
   Serial.print(rxBuf[6]);
-   Serial.print("\t");
+  Serial.print("\t");
   Serial.print(rxBuf[7]);
   Serial.println();
 }
@@ -267,36 +268,36 @@ void messageDecode(long unsigned int rxId, unsigned char len, unsigned char rxBu
       engineRPM = ((rxBuf[0] * 256.0) + (rxBuf[1] / 4.0)) / 3.85;
       carSpeed = (rxBuf[4] * 256 + rxBuf[5] - 10000) / 100;
       pedalPosition = (rxBuf[6]) / 2;
-//      Serial.print("EngineRPM:\t");
-//            Serial.println(engineRPM);
-//            Serial.print("\t");
-////            Serial.print(carSpeed);
-//            Serial.print("Pedal Position:\t");
-//            Serial.print(pedalPosition);
-//            Serial.print("\n");
+      //      Serial.print("EngineRPM:\t");
+      //            Serial.println(engineRPM);
+      //            Serial.print("\t");
+      ////            Serial.print(carSpeed);
+      //            Serial.print("Pedal Position:\t");
+      //            Serial.print(pedalPosition);
+      //            Serial.print("\n");
       break;
 
     case 0x203: //Traction Control light or torque or something
       //NEED TO TESTS THIS
-//      Serial.print("ingector:\t");
-//      Serial.println(rxBuf[5]);
-//      Serial.print("First Traction Control Row:\t");
-//      printEverything(rxId, len, rxBuf);
+      //      Serial.print("ingector:\t");
+      //      Serial.println(rxBuf[5]);
+      //      Serial.print("First Traction Control Row:\t");
+      //      printEverything(rxId, len, rxBuf);
       break;
 
     case 0x231: //Also to do with traction control apparently
       //Also need to test his
-//        Serial.print("SusBIN:\t"); //rxbuf[0] 255 in gear, 15 out of gear
-//        Serial.print(rxBuf[0]);
-//        Serial.println();
-//      Serial.print("Second Traction Control Row:\t");
-//      printEverything(rxId, len, rxBuf);
+      //        Serial.print("SusBIN:\t"); //rxbuf[0] 255 in gear, 15 out of gear
+      //        Serial.print(rxBuf[0]);
+      //        Serial.println();
+      //      Serial.print("Second Traction Control Row:\t");
+      //      printEverything(rxId, len, rxBuf);
       break;
 
 
     case 0x240:
       coolantTemp = rxBuf[3] - 40;
-//            Serial.print("Coolant Temp:\t");
+      //            Serial.print("Coolant Temp:\t");
       //      Serial.println(coolantTemp);
       break;
 
@@ -304,15 +305,15 @@ void messageDecode(long unsigned int rxId, unsigned char len, unsigned char rxBu
       //20 - 120c -> 90 - 170
       engineTemp = map(rxBuf[0], 90, 170, 20, 120);
       oilPressure = rxBuf[4]; //useless LOL
-//            Serial.print("Oil Pressure:\t");
+      //            Serial.print("Oil Pressure:\t");
       //      Serial.println(oilPressure);
       break;
 
 
     case 0x430: //Need to test this -> Apparently fuel level??????
-//      Serial.print("Fuel Level:\t");
-      
-      printEverything(rxId, len, rxBuf);
+      //      Serial.print("Fuel Level:\t");
+
+      //      printEverything(rxId, len, rxBuf);
       break;
 
 
@@ -340,19 +341,24 @@ void messageDecode(long unsigned int rxId, unsigned char len, unsigned char rxBu
 
 void loop()
 {
-    if((millis()-refresh_timer) > REFRESH_TIME){ 
-      myNex.writeNum("acl.val", pedalPosition);   
-      refresh_timer = millis();
-    }       
- 
+  if ((millis() - refresh_timer) > REFRESH_TIME) {
+    Serial.print("acl.val=");
+    Serial.print(pedalPosition);
+    Serial.write(0xff);
+    Serial.write(0xff);
+    Serial.write(0xff);
+    refresh_timer = millis();
+  }
+
   if (!digitalRead(CAN0_INT))
   {
     CAN0.readMsgBuf(&rxId, &len, rxBuf);
+    //    Serial.println(pedalPosition);
 
-    if ((rxId & 0x80000000) == 0x80000000)    // Determine if ID is standard (11 bits) or extended (29 bits)
-      sprintf(msgString, "Extended ID: 0x%.8lX  DLC: %1d  Data:", (rxId & 0x1FFFFFFF), len);
-    else
-      sprintf(msgString, "0x%.3lX,%1d", rxId, len); //Standard.
+    //    if ((rxId & 0x80000000) == 0x80000000)    // Determine if ID is standard (11 bits) or extended (29 bits)
+    //      sprintf(msgString, "Extended ID: 0x%.8lX  DLC: %1d  Data:", (rxId & 0x1FFFFFFF), len);
+    //    else
+    //      sprintf(msgString, "0x%.3lX,%1d", rxId, len); //Standard.
 
     //    Serial.print(msgString);
     messageDecode(rxId, len, rxBuf);
